@@ -4,6 +4,7 @@ import { QUESTIONS } from "@/lib/questions";
 import HomePage from "@/components/HomePage";
 import MentalModelPage from "@/components/MentalModelPage";
 import PracticePage from "@/components/PracticePage";
+import GuestimatePopup from "@/components/GuestimatePopup";
 
 // App states: 'home' | 'practice'
 
@@ -51,6 +52,7 @@ export default function Page() {
   const [session, setSession] = useState(INITIAL_SESSION);
   const [mentalModelOpen, setMentalModelOpen] = useState(false);
   const [hasSavedSession, setHasSavedSession] = useState(false);
+  const [showGuestimatePopup, setShowGuestimatePopup] = useState(false);
 
   // Check localStorage on mount to decide whether to show "Continue Practice"
   useEffect(() => {
@@ -70,7 +72,14 @@ export default function Page() {
     };
     setSession(newSession);
     persistSession(newSession);
-    setAppState("practice");
+
+    // First-time check: show mental model popup before entering practice
+    const hasSeenModel = localStorage.getItem("pmgym_seen_guesstimate_model");
+    if (!hasSeenModel) {
+      setShowGuestimatePopup(true);
+    } else {
+      setAppState("practice");
+    }
   }
 
   function handleContinuePractice() {
@@ -131,6 +140,12 @@ export default function Page() {
     setMentalModelOpen(false);
   }
 
+  function handleGuestimatePopupDone() {
+    localStorage.setItem("pmgym_seen_guesstimate_model", "true");
+    setShowGuestimatePopup(false);
+    setAppState("practice");
+  }
+
   return (
     <>
       {appState === "home" && (
@@ -157,6 +172,10 @@ export default function Page() {
             />
           )}
         </>
+      )}
+
+      {showGuestimatePopup && (
+        <GuestimatePopup onContinue={handleGuestimatePopupDone} />
       )}
     </>
   );

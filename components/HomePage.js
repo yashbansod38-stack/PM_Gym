@@ -176,7 +176,8 @@ export default function HomePage({ onStartPractice, onContinuePractice, hasSaved
               <div>
                 <div className={styles.stepTitle}>Attempt Level 1</div>
                 <div className={styles.stepDesc}>
-                  Practice your opening 60–90 seconds. Score 7/10 or above to unlock Level 2.
+                  Practice your opening 60–90 seconds. Score 7/10 or above to clear the threshold
+                  and move to the next question.
                 </div>
               </div>
             </div>
