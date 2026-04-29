@@ -299,6 +299,15 @@
 .sectionGreen { border-left: 3px solid var(--green); background: var(--green-dim); }
 .sectionRed { border-left: 3px solid var(--red); background: var(--red-dim); }
 .sectionBlue { border-left: 3px solid var(--blue); background: var(--blue-dim); }
+.sectionAccent { border-left: 3px solid var(--accent); background: var(--accent-dim); }
+
+.topAnswerNote {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 10px;
+  line-height: 1.5;
+}
 
 .sectionTitle {
   font-family: var(--font-mono);

@@ -351,6 +351,19 @@ export default function PracticePage({
                     )}
                   </div>
                 )}
+
+                {/* Top 1% Opening — only shown when score < 7 */}
+                {session.activeQuestion?.topAnswer && scoreVal !== null && scoreVal < 7 && (
+                  <div className={`${styles.feedbackSection} ${styles.sectionAccent}`}>
+                    <div className={styles.sectionTitle}>TOP 1% OPENING</div>
+                    <div className={styles.sectionBody}>
+                      {session.activeQuestion.topAnswer}
+                    </div>
+                    <div className={styles.topAnswerNote}>
+                      This is one strong version. Yours can be phrased differently and still score 9/10.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Your submitted answer */}
@@ -358,6 +371,7 @@ export default function PracticePage({
                 <div className={styles.yourAnswerLabel}>Your answer</div>
                 <div className={styles.yourAnswerText}>{answer}</div>
               </div>
+
 
               {/* Action buttons */}
               <div className={styles.actionRow}>
