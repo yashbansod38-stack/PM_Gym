@@ -1,0 +1,568 @@
+/* ═══════════════════════════════════════════════════
+   OnboardingDemo — Warm Light Mode
+   ═══════════════════════════════════════════════════ */
+
+/* Tokens (light override — used only in this component) */
+.root {
+  --ob-bg:           #FAFAF8;
+  --ob-surface:      #FFFFFF;
+  --ob-text:         #1A1A1A;
+  --ob-text-sec:     #4A4A4A;
+  --ob-text-muted:   #888888;
+  --ob-accent:       #F5C842;
+  --ob-border:       #E5E5E0;
+  --ob-green:        #2D7A4F;
+  --ob-blue:         #2E5FA3;
+  --ob-shadow:       0 1px 3px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.04);
+
+  min-height: 100vh;
+  background: var(--ob-bg);
+  color: var(--ob-text);
+  font-family: var(--font-sans, 'IBM Plex Sans', sans-serif);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Animations ──────────────────────────────────── */
+@keyframes obFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes obPartSlide {
+  from { opacity: 0; transform: translateX(-10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes obPulseBtn {
+  0%   { box-shadow: 0 0 0 0 rgba(245, 200, 66, 0.6); }
+  60%  { box-shadow: 0 0 0 12px rgba(245, 200, 66, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(245, 200, 66, 0); }
+}
+
+.fadeIn {
+  animation: obFadeIn 0.4s ease both;
+}
+
+/* ── Top Bar ─────────────────────────────────────── */
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 52px;
+  background: var(--ob-surface);
+  border-bottom: 1px solid var(--ob-border);
+  box-shadow: 0 1px 0 var(--ob-border);
+}
+
+.topBarLeft,
+.topBarRight {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.topBarRight {
+  justify-content: flex-end;
+}
+
+.topBarCenter {
+  flex: 0 0 auto;
+}
+
+.demoTag {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--ob-text-muted);
+  background: #F0EFE9;
+  border: 1px solid var(--ob-border);
+  border-radius: 3px;
+  padding: 3px 8px;
+  text-transform: uppercase;
+}
+
+.logoText {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ob-text);
+  letter-spacing: 0.01em;
+}
+
+.skipBtn {
+  font-family: var(--font-sans, 'IBM Plex Sans', sans-serif);
+  font-size: 13px;
+  color: var(--ob-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.skipBtn:hover {
+  color: var(--ob-text-sec);
+}
+
+/* ── Two-column layout ───────────────────────────── */
+.layout {
+  flex: 1;
+  display: flex;
+  gap: 0;
+  max-width: 1060px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 36px 28px 48px;
+  box-sizing: border-box;
+  align-items: flex-start;
+}
+
+/* Left column */
+.leftCol {
+  flex: 1;
+  min-width: 0;
+  padding-right: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Right column */
+.rightCol {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+/* ── Question header ─────────────────────────────── */
+.questionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.questionLabel {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--ob-text-muted);
+  text-transform: uppercase;
+}
+
+.questionSubtext {
+  font-size: 13px;
+  color: var(--ob-text-sec);
+  line-height: 1.5;
+}
+
+/* ── Question text ───────────────────────────────── */
+.questionText {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ob-text);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+/* ── Answer area ─────────────────────────────────── */
+.answerArea {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.textarea {
+  width: 100%;
+  background: var(--ob-surface);
+  border: 1.5px solid var(--ob-border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  font-family: var(--font-sans, 'IBM Plex Sans', sans-serif);
+  font-size: 14px;
+  color: var(--ob-text);
+  line-height: 1.65;
+  resize: vertical;
+  min-height: 180px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--ob-shadow);
+  outline: none;
+  box-sizing: border-box;
+}
+
+.textarea::placeholder {
+  color: var(--ob-text-muted);
+}
+
+.textarea:focus {
+  border-color: var(--ob-accent);
+  box-shadow: 0 0 0 3px rgba(245, 200, 66, 0.12);
+}
+
+/* ── Progress bar ────────────────────────────────── */
+.progressBar {
+  display: flex;
+  gap: 6px;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressSegment {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ob-border);
+  transition: background 0.3s ease;
+}
+
+.progressActive,
+.progressDone {
+  /* background is set inline via step.color */
+  transition: background 0.3s ease;
+}
+
+/* ── Submit row ──────────────────────────────────── */
+.submitRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.charCount {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 11px;
+  color: var(--ob-text-muted);
+}
+
+.submitBtn {
+  font-family: var(--font-sans, 'IBM Plex Sans', sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--ob-accent);
+  color: #1A1A1A;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 200, 66, 0.35);
+}
+
+.submitBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.submitPulse {
+  animation: obPulseBtn 0.9s ease-out;
+}
+
+.allDoneHint {
+  font-size: 12px;
+  color: var(--ob-text-sec);
+  font-style: italic;
+  text-align: right;
+  margin-top: -4px;
+}
+
+/* ── Step Coach panel ────────────────────────────── */
+.coachPanel {
+  background: var(--ob-surface);
+  border: 1px solid var(--ob-border);
+  border-radius: 8px;
+  padding: 20px 18px;
+  box-shadow: var(--ob-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 72px;
+}
+
+.coachTitle {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--ob-text-muted);
+  text-transform: uppercase;
+}
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Individual step card ────────────────────────── */
+.stepCard {
+  border-left: 3px solid var(--ob-border);
+  border-radius: 0 5px 5px 0;
+  padding: 12px 14px;
+  background: transparent;
+  transition: background 0.25s, border-left-color 0.25s, opacity 0.2s;
+}
+
+.stepLocked {
+  opacity: 0.45;
+}
+
+.stepDone {
+  /* opacity set inline */
+}
+
+.stepHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.stepNumber {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ob-text-muted);
+  background: #F0EFE9;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.stepTitleRow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.stepTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ob-text);
+  transition: color 0.2s;
+  line-height: 1.35;
+}
+
+.stepIcon {
+  font-size: 12px;
+  color: var(--ob-text-muted);
+  flex-shrink: 0;
+}
+
+.stepInstruction {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ob-text-sec);
+  line-height: 1.6;
+  white-space: pre-line;
+  padding-left: 30px;
+}
+
+/* ════════════════════════════════════════════════════
+   BREAKDOWN SCREEN
+   ════════════════════════════════════════════════════ */
+
+.breakdownWrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 28px 60px;
+}
+
+.breakdownCard {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: obFadeIn 0.4s ease both;
+}
+
+/* Score */
+.scoreRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  margin-bottom: 6px;
+}
+
+.scoreNum {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 48px;
+  font-weight: 700;
+  color: #F5A623;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.scoreDen {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 22px;
+  font-weight: 500;
+  color: #F5A623;
+  opacity: 0.65;
+  line-height: 1;
+}
+
+.scoreStatus {
+  font-size: 15px;
+  color: var(--ob-text-sec);
+  line-height: 1.5;
+  margin-bottom: 32px;
+}
+
+/* Breakdown heading */
+.breakdownHeading {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ob-text-muted);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+/* Parts list */
+.partsList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.part {
+  border-left: 3px solid transparent;
+  border-radius: 0 6px 6px 0;
+  padding: 16px 18px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.partVisible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.partLabel {
+  font-family: var(--font-mono, 'IBM Plex Mono', monospace);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.partText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ob-text);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+
+.partSubtext {
+  font-size: 12px;
+  color: var(--ob-text-muted);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Note */
+.breakdownNote {
+  font-size: 13px;
+  color: var(--ob-text-sec);
+  line-height: 1.65;
+  padding: 16px 18px;
+  background: #F5F4F0;
+  border-radius: 6px;
+  border: 1px solid var(--ob-border);
+  margin-bottom: 28px;
+}
+
+/* CTA block */
+.ctaBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ctaBtn {
+  width: 100%;
+  font-family: var(--font-sans, 'IBM Plex Sans', sans-serif);
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--ob-accent);
+  color: #1A1A1A;
+  border: none;
+  border-radius: 6px;
+  padding: 15px 24px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: opacity 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+
+.ctaBtn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245, 200, 66, 0.40);
+}
+
+.ctaBtn:active {
+  transform: translateY(0);
+}
+
+.ctaNote {
+  font-size: 12px;
+  color: var(--ob-text-muted);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 760px) {
+  .layout {
+    flex-direction: column;
+    padding: 24px 16px 40px;
+  }
+
+  .leftCol {
+    padding-right: 0;
+  }
+
+  .rightCol {
+    width: 100%;
+  }
+
+  .coachPanel {
+    position: static;
+  }
+
+  .questionText {
+    font-size: 18px;
+  }
+}

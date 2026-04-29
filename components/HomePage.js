@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import styles from "./HomePage.module.css";
 
 const UNIVERSAL_MENTAL_MODEL = [
@@ -101,6 +101,22 @@ const UNIVERSAL_MENTAL_MODEL = [
 
 export default function HomePage({ onStartPractice, onContinuePractice, hasSavedSession }) {
   const mentalModelRef = useRef(null);
+  const videoRef = useRef(null);
+  const [videoOpen, setVideoOpen] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+
+  function openVideo() {
+    setVideoOpen(true);
+    setVideoEnded(false);
+  }
+
+  function closeVideo() {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+    setVideoOpen(false);
+    setVideoEnded(false);
+  }
 
   return (
     <div className={styles.wrapper}>
@@ -159,6 +175,40 @@ export default function HomePage({ onStartPractice, onContinuePractice, hasSaved
         {/* How it works */}
         <section className={styles.howItWorks}>
           <div className={styles.sectionLabel}>How it works</div>
+
+          {/* Video card */}
+          <div className={styles.videoCard}>
+            {/* Left — thumbnail */}
+            <div
+              className={styles.videoThumb}
+              onClick={openVideo}
+              role="button"
+              aria-label="Watch demo video"
+            >
+              <div className={styles.videoPlayBtn}>▶</div>
+              <div className={styles.videoDuration}>1 min 4 sec</div>
+            </div>
+
+            {/* Right — text */}
+            <div className={styles.videoCardText}>
+              <div className={styles.videoWatchLabel}>WATCH FIRST</div>
+              <div className={styles.videoCardHeading}>
+                See how PM Interview Gym works
+              </div>
+              <p className={styles.videoCardBody}>
+                Watch a quick demo before you start. See a weak answer, a
+                strong answer, and how the feedback works — in 64 seconds.
+              </p>
+              <button
+                id="homepage-watch-demo-btn"
+                className={styles.videoWatchBtn}
+                onClick={openVideo}
+              >
+                ▶ Watch the demo
+              </button>
+            </div>
+          </div>
+
           <div className={styles.steps}>
             <div className={styles.step}>
               <span className={styles.stepNum}>01</span>
@@ -241,6 +291,71 @@ export default function HomePage({ onStartPractice, onContinuePractice, hasSaved
         </footer>
 
       </div>
+
+      {/* Video overlay */}
+      {videoOpen && (
+        <div
+          className={styles.videoOverlay}
+          onClick={(e) => { if (e.target === e.currentTarget) closeVideo(); }}
+        >
+          <div className={styles.videoContainer}>
+            {/* Top bar */}
+            <div className={styles.videoTopBar}>
+              <span className={styles.videoTopLabel}>
+                PM Interview Gym — How It Works
+              </span>
+              <button
+                id="video-overlay-close-btn"
+                className={styles.videoCloseBtn}
+                onClick={closeVideo}
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {/* Video */}
+            <video
+              ref={videoRef}
+              className={styles.videoEl}
+              src="/DemoPmGym.mp4"
+              controls
+              onEnded={() => setVideoEnded(true)}
+            />
+
+            {/* Bottom bar */}
+            <div className={styles.videoBottomBar}>
+              <div className={styles.videoBottomLeft}>
+                {videoEnded ? (
+                  <span className={styles.videoCompleteText}>✓ Demo complete</span>
+                ) : (
+                  <span className={styles.videoBottomHint}>
+                    Watch the full demo to unlock the next step
+                  </span>
+                )}
+              </div>
+              <div className={styles.videoBottomRight}>
+                {videoEnded ? (
+                  <button
+                    id="video-overlay-cta-btn"
+                    className={styles.videoCta}
+                    onClick={closeVideo}
+                  >
+                    Now try it yourself →
+                  </button>
+                ) : (
+                  <button
+                    id="video-overlay-skip-btn"
+                    className={styles.videoSkip}
+                    onClick={closeVideo}
+                  >
+                    Skip for now →
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

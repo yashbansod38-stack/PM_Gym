@@ -4,9 +4,9 @@ import { QUESTIONS } from "@/lib/questions";
 import HomePage from "@/components/HomePage";
 import MentalModelPage from "@/components/MentalModelPage";
 import PracticePage from "@/components/PracticePage";
-import GuestimatePopup from "@/components/GuestimatePopup";
+import OnboardingDemo from "@/components/OnboardingDemo";
 
-// App states: 'home' | 'practice'
+// App states: 'home' | 'onboarding' | 'practice'
 
 const STORAGE_KEY = "pmgym_session";
 const DEFAULT_QUESTION_TYPE = "Guesstimates";
@@ -48,11 +48,10 @@ const INITIAL_SESSION = {
 };
 
 export default function Page() {
-  const [appState, setAppState] = useState("home"); // 'home' | 'practice'
+  const [appState, setAppState] = useState("home"); // 'home' | 'onboarding' | 'practice'
   const [session, setSession] = useState(INITIAL_SESSION);
   const [mentalModelOpen, setMentalModelOpen] = useState(false);
   const [hasSavedSession, setHasSavedSession] = useState(false);
-  const [showGuestimatePopup, setShowGuestimatePopup] = useState(false);
 
   // Check localStorage on mount to decide whether to show "Continue Practice"
   useEffect(() => {
@@ -73,10 +72,10 @@ export default function Page() {
     setSession(newSession);
     persistSession(newSession);
 
-    // First-time check: show mental model popup before entering practice
+    // First-time check: show onboarding before entering practice
     const hasSeenModel = localStorage.getItem("pmgym_seen_guesstimate_model");
     if (!hasSeenModel) {
-      setShowGuestimatePopup(true);
+      setAppState("onboarding");
     } else {
       setAppState("practice");
     }
@@ -140,9 +139,8 @@ export default function Page() {
     setMentalModelOpen(false);
   }
 
-  function handleGuestimatePopupDone() {
+  function handleOnboardingComplete() {
     localStorage.setItem("pmgym_seen_guesstimate_model", "true");
-    setShowGuestimatePopup(false);
     setAppState("practice");
   }
 
@@ -154,6 +152,10 @@ export default function Page() {
           onContinuePractice={handleContinuePractice}
           hasSavedSession={hasSavedSession}
         />
+      )}
+
+      {appState === "onboarding" && (
+        <OnboardingDemo onComplete={handleOnboardingComplete} />
       )}
 
       {appState === "practice" && (
@@ -172,10 +174,6 @@ export default function Page() {
             />
           )}
         </>
-      )}
-
-      {showGuestimatePopup && (
-        <GuestimatePopup onContinue={handleGuestimatePopupDone} />
       )}
     </>
   );
