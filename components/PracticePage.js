@@ -21,8 +21,10 @@ export default function PracticePage({
   const [error, setError] = useState(null);
   const [panelTab, setPanelTab] = useState("cheatsheet"); // 'cheatsheet' | 'correction'
   const [levelUpModal, setLevelUpModal] = useState(false);
-  const [currentLevel, setCurrentLevel] = useState(1); // 1 or 2
   const textareaRef = useRef(null);
+
+  // BUG-5 fix: derive currentLevel from session (persisted), not local state
+  const currentLevel = session.currentLevelNum ?? 1;
 
   const questionType = session.questionType || "Guesstimates";
   const model = MENTAL_MODELS[questionType];
@@ -32,7 +34,8 @@ export default function PracticePage({
   const attemptNumber = session.attemptNumber || 0;
   const lastScore = session.lastScore;
   const bestScore = session.bestScore;
-  const isSessionComplete = !activeQuestion || questionIndex >= questions.length;
+  const isLockedType = questions.length === 0; // BUG-11 fix: distinguish locked types from genuinely finished sessions
+  const isSessionComplete = !isLockedType && (!activeQuestion || questionIndex >= questions.length);
 
   async function handleSubmit() {
     if (!answer.trim() || answer.trim().length < 10) return;
@@ -97,6 +100,7 @@ export default function PracticePage({
       // Level up modal
       if (levelCleared && currentLevel === 1 && !session.level1Cleared) {
         setLevelUpModal(true);
+        onUpdateSession({ currentLevelNum: 2 }); // BUG-5 fix: persist level advancement
       }
     } catch (err) {
       setError("Network error. Please check your connection and try again.");
@@ -109,7 +113,11 @@ export default function PracticePage({
     setAnswer("");
     setFeedback(null);
     setError(null);
-    setPanelTab(session.mentalModelCorrectionPrevious ? "correction" : "cheatsheet");
+    // BUG-4 fix: read from already-resolved feedback state, not potentially stale session
+    const hasCorrection =
+      (feedback?.mentalModelCorrection && feedback.mentalModelCorrection !== "No correction needed.") ||
+      session.mentalModelCorrectionPrevious;
+    setPanelTab(hasCorrection ? "correction" : "cheatsheet");
     if (textareaRef.current) textareaRef.current.focus();
   }
 
@@ -118,7 +126,7 @@ export default function PracticePage({
     setAnswer("");
     setFeedback(null);
     setError(null);
-    setCurrentLevel(1);
+    // currentLevel is reset to 1 via session.currentLevelNum in page.js handleNextQuestion
     setPanelTab("cheatsheet");
     // Delegate index increment + question selection to parent
     onNextQuestion();
@@ -132,12 +140,49 @@ export default function PracticePage({
         : "var(--red)"
     : "var(--text-muted)";
 
+  // ── Locked Question Type Screen (BUG-11) ──────────────────────────────────
+  if (isLockedType) {
+    return (
+      <div className={styles.wrapper}>
+        <header className={styles.topBar}>
+          <div className={styles.topLeft}>
+            <button id="back-home-btn-locked" className={styles.backHomeBtn} onClick={onBackToHome}>
+              ← Home
+            </button>
+            <span className={styles.topType}>{questionType}</span>
+          </div>
+        </header>
+        <div className={styles.completionWrapper}>
+          <div className={`${styles.completionCard} fade-in`}>
+            <div className={styles.completionIcon} style={{ color: "var(--text-muted)" }}>🔒</div>
+            <h2 className={styles.completionTitle}>Coming Soon</h2>
+            <p className={styles.completionBody}>
+              {questionType} questions are locked in V1. Complete Guesstimates Level 1 first.
+            </p>
+            <div className={styles.completionActions}>
+              <button className={styles.homeBtn} onClick={onBackToHome}>
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ── Session Complete Screen ──────────────────────────────────────────────
   if (isSessionComplete) {
     return (
       <div className={styles.wrapper}>
         <header className={styles.topBar}>
           <div className={styles.topLeft}>
+            <button
+              id="back-home-btn-complete"
+              className={styles.backHomeBtn}
+              onClick={onBackToHome}
+            >
+              ← Home
+            </button>
             <span className={styles.topType}>{questionType}</span>
           </div>
           <div className={styles.topRight}>
@@ -170,11 +215,11 @@ export default function PracticePage({
                     lastScore: null,
                     mentalModelCorrectionPrevious: null,
                     level1Cleared: false,
+                    currentLevelNum: 1, // BUG-5 fix: reset level on restart
                   });
                   setAnswer("");
                   setFeedback(null);
                   setError(null);
-                  setCurrentLevel(1);
                   setPanelTab("cheatsheet");
                 }}
               >
@@ -197,6 +242,13 @@ export default function PracticePage({
       {/* Top bar */}
       <header className={styles.topBar}>
         <div className={styles.topLeft}>
+          <button
+            id="back-home-btn"
+            className={styles.backHomeBtn}
+            onClick={onBackToHome}
+          >
+            ← Home
+          </button>
           <div className={styles.topDivider} />
           <span className={styles.topType}>{questionType}</span>
           <span className={styles.topSep}>/</span>
@@ -526,7 +578,8 @@ export default function PracticePage({
             <div className={styles.modalIcon}>✓</div>
             <h2 className={styles.modalTitle}>Threshold Cleared</h2>
             <p className={styles.modalBody}>
-              You scored {scoreVal ?? feedback?.scoreRaw ?? "—"}/10 — above the 7/10 bar.
+              {/* BUG-10 fix: safe score display — modal only shows when score >= 7, so scoreVal should always exist */}
+              You scored {scoreVal !== null ? `${scoreVal}/10` : feedback?.scoreRaw ? `${feedback.scoreRaw}/10` : "above 7/10"} — above the threshold.
               Close this to read your feedback and decide what to do next.
             </p>
           </div>

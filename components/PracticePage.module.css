@@ -41,6 +41,21 @@
 }
 .backBtn:hover { border-color: var(--border-active); color: var(--text-primary); }
 
+/* BUG-6 fix: top-bar home button */
+.backHomeBtn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-right: 4px;
+}
+.backHomeBtn:hover { border-color: var(--border-active); color: var(--text-primary); }
+
 .topDivider {
   width: 1px;
   height: 14px;

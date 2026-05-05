@@ -108,11 +108,18 @@ export default function HomePage({ onStartPractice, onContinuePractice, hasSaved
   function openVideo() {
     setVideoOpen(true);
     setVideoEnded(false);
+    // Attempt autoplay on open
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play().catch(() => {/* autoplay blocked — user must click play */});
+      }
+    }, 100);
   }
 
   function closeVideo() {
     if (videoRef.current) {
       videoRef.current.pause();
+      videoRef.current.currentTime = 0;
     }
     setVideoOpen(false);
     setVideoEnded(false);
@@ -296,7 +303,7 @@ export default function HomePage({ onStartPractice, onContinuePractice, hasSaved
       {videoOpen && (
         <div
           className={styles.videoOverlay}
-          onClick={(e) => { if (e.target === e.currentTarget) closeVideo(); }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) closeVideo(); }}
         >
           <div className={styles.videoContainer}>
             {/* Top bar */}
@@ -319,6 +326,7 @@ export default function HomePage({ onStartPractice, onContinuePractice, hasSaved
               className={styles.videoEl}
               src="/DemoPmGym.mp4"
               controls
+              playsInline
               onEnded={() => setVideoEnded(true)}
             />
 

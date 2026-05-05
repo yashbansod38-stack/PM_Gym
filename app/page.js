@@ -38,6 +38,7 @@ const INITIAL_SESSION = {
   questionType: DEFAULT_QUESTION_TYPE,
   questionIndex: 0,
   currentLevel: "Easy",
+  currentLevelNum: 1, // BUG-5 fix: persist numeric level so Continue Practice restores it
   attemptNumber: 0,
   lastScore: null,
   activeQuestion: null,
@@ -71,6 +72,7 @@ export default function Page() {
     };
     setSession(newSession);
     persistSession(newSession);
+    setHasSavedSession(true); // BUG-3 fix: update immediately, not just on mount
 
     // First-time check: show onboarding before entering practice
     const hasSeenModel = localStorage.getItem("pmgym_seen_guesstimate_model");
@@ -115,6 +117,7 @@ export default function Page() {
         lastScore: null,
         mentalModelCorrectionPrevious: null,
         level1Cleared: false,
+        currentLevelNum: 1, // BUG-5 fix: reset level for new question
       };
       persistSession(next);
       return next;

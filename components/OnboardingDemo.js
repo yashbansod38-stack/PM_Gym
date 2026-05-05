@@ -66,23 +66,27 @@ function checkSteps(text, currentSteps) {
   const lower = text.toLowerCase();
   const next = { ...currentSteps };
 
-  // Step 1: must contain "before i structure"
+  // Step 1: must contain the opening intent phrase
   if (!next[1]) {
-    if (lower.includes("before i structure")) {
+    if (lower.includes("before i structure") || lower.includes("one quick clarification") || lower.includes("just to make sure")) {
       next[1] = true;
     }
   }
 
-  // Step 2: length > 80 after step 1 done
+  // Step 2: must actually ask something (question mark) after step 1 done
+  // BUG-8 fix: content-signal check instead of pure length
   if (next[1] && !next[2]) {
-    if (text.length > 80) {
+    if (text.includes("?") && text.length > 60) {
       next[2] = true;
     }
   }
 
-  // Step 3: length > 140 after step 2 done
+  // Step 3: must show reasoning — causal language after step 2 done
+  // BUG-8 fix: check for reasoning keywords, not just character count
   if (next[2] && !next[3]) {
-    if (text.length > 140) {
+    const reasoningKeywords = ["because", "change", "different", "pattern", "vary", "impact", "affect", "depends", "significantly", "each", "that would"];
+    const hasReasoning = reasoningKeywords.some((kw) => lower.includes(kw));
+    if (hasReasoning && text.length > 120) {
       next[3] = true;
     }
   }
@@ -116,7 +120,8 @@ export default function OnboardingDemo({ onComplete }) {
   const textareaRef = useRef(null);
   const allDone = stepsComplete[1] && stepsComplete[2] && stepsComplete[3];
   const activeStep = getActiveStep(stepsComplete);
-  const canSubmit = answer.trim().length >= 15;
+  // BUG-7 fix: require Step 1 to be done before submit is enabled
+  const canSubmit = stepsComplete[1] && answer.trim().length >= 15;
 
   // Pulse submit button once when all steps done
   useEffect(() => {
